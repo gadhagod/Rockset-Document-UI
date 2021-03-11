@@ -1,0 +1,88 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="https://console.rockset.com/img/306413ae2d6237dcf69188b9b3ce75f7.svg">
+
+    <title>Rockset UI | Add Document</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet">
+    <script>
+      document.addEventListener("keyup", function(event) {
+          if (event.keyCode === 13) {
+              alert('Please hit submit.');
+          }
+      });
+      function add_doc() {
+
+          let xhr = new XMLHttpRequest();
+          workspace = document.getElementById('workspace').value
+          collection = document.getElementById('collection').value
+          document_body = document.getElementById('document_body').value
+
+          xhr.open('POST', `https://api.rs2.usw2.rockset.com/v1/orgs/self/ws/${workspace}/collections/${collection}/docs`);
+          
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.setRequestHeader('Authorization', 'ApiKey {{ api_key }}');
+          xhr.send(`{
+              "data": [${document_body}]
+          }`);
+          xhr.onreadystatechange = function() {
+              if(xhr.readyState==4) {
+                  if (xhr.status == 200) {
+                      document.getElementById('result').innerHTML = `Document created with _id "${JSON.parse(xhr.response).data[0]._id}"`
+                  } else {
+                      alert(`Error ${xhr.status}: ${xhr.response}`);
+                      console.log(xhr.response.data)
+                  }
+              }
+          };
+
+          xhr.onerror = function() {
+              alert('Request failed');
+          };
+      }
+    </script>
+  </head>
+
+  <body>
+
+    <form class="form-signin">
+      <div class="text-center mb-4">
+        <a href="https://rockset.com/">
+          <img class="mb-4" src="{{ url_for('static', filename='logo-mini.png') }}" width="122" height="122">
+        </a>
+        <h1 class="h3 mb-3 font-weight-normal form-control-lg">Add document</h1>
+      </div>
+
+      <div class="form-label-group">
+        <input type="text" id="document_body" class="form-control" placeholder="JSON Document" autofocus>
+        <label class="input-lg form-control-lg-9" for="document_body"><center>Document body</center></label>
+      </div>
+
+      <div class="form-label-group">
+        <input type="text" id="workspace" class="form-control" placeholder="Workspace" >
+        <label for="workspace"><center>Workspace</center></label>
+      </div>
+
+      <div class="form-label-group">
+        <input type="text" id="collection" class="form-control" placeholder="Collection" >
+        <label for="collection"><center>Collection</center></label>
+      </div>
+
+      <button class="btn btn-lg btn-primary btn-block" type="button" onclick="add_doc()">Create</button>
+
+      <br>
+
+      <center>
+        <p style="color:green;" id="result"></p>
+      </center>
+
+      <a href="/delete"><p class="mt-5 mb-3 text-center">Delete Documents</p></a>
+    </form>
+  </body>
+</html>
